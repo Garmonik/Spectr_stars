@@ -1,0 +1,45 @@
+spectra = importdata('spectra.csv');
+lambdaStart = importdata('lambda_start.csv');
+lambdaDelta = importdata('lambda_delta.csv');
+starNames = importdata('star_names.csv');
+
+speedOfLight = 299792.458;
+lambdaPr = 656.28;
+
+nNames = size(starNames, 1);
+nObs = size(spectra, 1);
+lambdaEnd = lambdaStart + (nObs - 1) * lambdaDelta;
+lambda = (lambdaStart : lambdaDelta : lambdaEnd)';
+fg1 = figure;
+
+xlabel('Длина волны, нм')
+ylabel(['Интенсивность, эрг/см^2/с/', char(197)])
+
+speed = (zeros(1, nNames))';
+set(fg1, 'Visible', 'on')
+
+hold on;
+grid on;
+
+for j = 1:nNames
+s = spectra(:, j);
+[sHa, idx] = min(s);
+lambdaHa = lambda(idx);
+grad = (lambdaHa / lambdaPr) - 1;
+speed(j) = grad * speedOfLight;
+
+if speed(j) > 0
+plot(lambda, s, 'LineWidth', 3, 'LineStyle', "-")
+else
+plot(lambda, s, 'LineWidth', 1, 'LineStyle', "--")
+end
+end
+
+legend(starNames, "Location", "northeast")
+text(lambdaStart + 3, max(s) * 8 ,'Колядич Марк Б01 - 002')
+title('Спектры звёзд')
+hold off;
+
+num = speed > 0
+movaway = starNames(num)
+saveas(fg1,'Mark.png');
